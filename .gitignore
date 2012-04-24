@@ -1,4 +1,5 @@
 *.o
+f2j
 cfitsio/libcfitsio.a
 cfitsio/Makefile
 cfitsio/cfitsio.pc
