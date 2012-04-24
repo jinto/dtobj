@@ -1,0 +1,6 @@
+*.o
+cfitsio/libcfitsio.a
+cfitsio/Makefile
+cfitsio/cfitsio.pc
+cfitsio/config.log
+cfitsio/config.status

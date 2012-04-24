@@ -3,3 +3,9 @@ gcc -o f2j -ljpeg fitsio/libcfitsio.a FITS2jpeg.c jpegsubs.c
 
 FLIGrab은 20120308_edit_00.fit 에 대해서 자동으로 2317~2366 구간을 잡아낸다.
 아마도, 50씩 10만큼씩 조사하면 어떨까 싶다.
+
+
+== First ==
+cd cfitsio
+./configure
+make
