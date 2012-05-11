@@ -1,0 +1,8 @@
+Makefile*
+debug
+release
+Info.plist
+fakesat.app
+qtex
+cand
+fakesat.pbproj

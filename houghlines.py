@@ -10,6 +10,8 @@ USE_STANDARD=0
 
 if __name__ == "__main__":
     filename = "building.jpg"
+    filename = "output/20120308_edit_00.jpg"
+
     if len(sys.argv)>1:
         filename = sys.argv[1]
 

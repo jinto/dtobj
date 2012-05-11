@@ -16,8 +16,8 @@ int main(int argc, char** argv)
     CvMemStorage* storage = cvCreateMemStorage(0);
     CvSeq* lines = 0;
     int i;
-    cvCanny(src, dst, 50, 200, 3);
-    //cvCanny(src, dst, 250, 400, 3);
+    //cvCanny(src, dst, 50, 200, 3);
+    cvCanny(src, dst, 250, 400, 3);
     cvCvtColor( dst, color_dst, CV_GRAY2BGR );
 #if 0
     lines = cvHoughLines2( dst, storage, CV_HOUGH_STANDARD,
@@ -47,8 +47,8 @@ int main(int argc, char** argv)
     lines = cvHoughLines2( dst, storage, CV_HOUGH_PROBABILISTIC,
                            1,
                            CV_PI/180,
-                           190,
-                           //80,
+                           //190,
+                           80,
                            30,
                            10 );
     for( i = 0; i < lines->total; i++ )
