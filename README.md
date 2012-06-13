@@ -15,20 +15,20 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 
 설치가 끝난 후에 Xcode 실행하고 메뉴에서 Preferences -> Downloads -> Command Line Tools -> install
 
-스크린샷 : ![스크린샷](https://github.com/jinto/dtobj/raw/master/xcode_commandline.png)
+![스크린샷](https://github.com/jinto/dtobj/raw/master/xcode_commandline.png)
 
 		
 2. brew and opencv 설치
 ----------
 
-터미널에서(LaunchPad 에서 유틸리티/터미널)
+LaunchPad 에서 유틸리티/터미널 실행한 후 
 		
-		# brew install
-		/usr/bin/ruby -e "$(/usr/bin/curl -fsSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)"
+	# brew install
+	/usr/bin/ruby -e "$(/usr/bin/curl -fsSL https://raw.github.com/mxcl/homebrew/master/Library/Contributions/install_homebrew.rb)"
 		
-		# install opencv
-		brew update
-		brew install opencv
+	# install opencv
+	brew update
+	brew install opencv
 
 3. 소스	가져오기
 -----
@@ -36,7 +36,7 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 		# 단순 clone
 		git clone http://github.com/jinto/dtobj
 
-		# 수정권한이 필요한 경우 (먼저 collaborator에 등록되어야함)
+		# 수정권한이 필요한 경우 (먼저 관리자(jinto)에 요청해서, collaborator에 등록되어야함)
 		git clone git@github.com:jinto/dtobj
 
 		# github에서 fork한후 merge 요청하는 방식도 가능
@@ -46,7 +46,7 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 ----
 
 		# 최초에는 cfitsio 라이브러리 빌드 필요
-		cd cfitsio; ./configure; make;cd ..;make
+		cd cfitsio; ./configure; make;cd ..
 		
 		# 이후에는 make만 실행하면 됨, 실행할 때는 -fits 옵션으로 fits파일을 지정해야함
 		./f2j -fits samples/20120308_edit_00.fit -quality 100 -max 2500 -min 2300;open output/20120308_edit_00.jpg 
