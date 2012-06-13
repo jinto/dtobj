@@ -49,6 +49,8 @@ int main ( int argc, char **argv )
 	g_vmax=vmax;
 	g_vmin=vmin;
 
+	g_vmin=0;
+	g_vmax=65535;
 	//g_vmin=2344;
 	//g_vmax=2346;
 /*vmax :12682.000000

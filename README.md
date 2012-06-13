@@ -38,6 +38,20 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 
 	sudo apt-get install libcv-dev libhighgui-dev  libcvaux-dev libcfitsio3-dev
 
+(현재는 메모리 오류가 발생하는데, 
+[OpenCV on Debian](http://www.lengrand.fr/2011/11/compiling-opencv-for-linux-debian/)와
+[OpenCV Wiki](http://opencv.willowgarage.com/wiki/InstallGuide%20%3A%20Debian) 참고
+
+* 저 페이지의 svn은 동작안함, http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.3.1/에서 소스 다운로드해야함
+
+* 중간에 v4l-dev는 libv4l-dev
+
+* CMake 부분은
+	cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON -D BUILD_EXAMPLES=ON /home/jinto/OpenCV-2.3.1/
+이런식
+
+
+
 3. 소스	가져오기
 -----
 
