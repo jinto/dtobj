@@ -49,8 +49,6 @@ int main ( int argc, char **argv )
 	g_vmax=vmax;
 	g_vmin=vmin;
 
-	g_vmin=0;
-	g_vmax=65535;
 	//g_vmin=2344;
 	//g_vmax=2346;
 /*vmax :12682.000000
@@ -242,7 +240,10 @@ void find_st_lines(char* fname) {
 
 void Usage()
 {
-    fprintf(stderr, "Usage: fits2jpeg -fits input_file\n");
+    fprintf(stderr, "Usage: fits2jpeg fits_file\n");
+    //fprintf(stderr, "        range :    range of ccd value for translating fits to jpeg (integer)\n");
+    fprintf(stderr, "        fitsfile : filename of fits\n");
+    fprintf(stderr, "                   must be ./samples/ subdirectory of current directory\n");
     exit(1); /* bail out */
 }
 
@@ -258,13 +259,19 @@ void jpegim (long inaxes[7], int *ierr)
 {
   int   naxis, iln,  donon, lname;
 
+	char* iinfile = (char*)malloc(strlen(infile)+40);
+	strcpy(iinfile, "samples/");
+	strcat(iinfile, infile);
   *ierr = 0;
 /*                                       Open */
-  if ( fits_open_file(&fptr, infile, READWRITE, ierr) ) {
-    fprintf(stderr,"ERROR  opening input FITS file %s \n", infile);
+  if ( fits_open_file(&fptr, iinfile, READWRITE, ierr) ) {
+    fprintf(stderr,"ERROR  opening input FITS file %s \n", iinfile);
     *ierr = 1;
+		free(iinfile);
     return;
   }
+	free(iinfile);
+
 /*                                       Get header information */
 	{
 		int _bitpix, _simple, _extend, _maxdim=7;
@@ -374,16 +381,6 @@ void commandline (int argc, char **argv)
   char *arg;
 
   if (argc<=1) Usage(); 
-  for (ax=1; ax<argc; ax++) {
-    arg = argv[ax];
-    if (strcmp(arg, "-fits") == 0) {
-      infile = argv[++ax];
-    }
-    else { 
-      Usage();
-    }
-  }
-
-  if (!infile) Usage();
+	infile = argv[1];
 } 
 
