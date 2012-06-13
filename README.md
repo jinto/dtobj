@@ -12,7 +12,7 @@ FITS 파일에서 Chopper에 의해 구간별로 쪼개진 직선의 검출. (FI
 1. xcode(command line tool포함)
 https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 설치가 끝난 후에는 Xcode -> Preferences -> Downloads -> Command Line Tools -> install
-스크린샷 : ![스크린샷](https://github.com/jinto/dtobj/blob/master/xcode_commandline.png)
+스크린샷 : ![스크린샷](https://github.com/jinto/dtobj/raw/master/xcode_commandline.png)
 		
 2. brew and opencv
 		
@@ -28,15 +28,14 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 
 4. 컴파일
 
-    cd cfitsio; ./configure; make;cd ..;make
-    gcc -o f2j -ljpeg cfitsio/libcfitsio.a fits2jpeg.c jpegsubs.c
-    ./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2500 -min 2300;open output/20120308_edit_00.jpg 
+		cd cfitsio; ./configure; make;cd ..;make
+		./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2500 -min 2300;open output/20120308_edit_00.jpg 
 
 별이 가장 잘보이는 상태
-    ./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2400 -min 2350;open output/20120308_edit_00.jpg 
+		./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2400 -min 2350;open output/20120308_edit_00.jpg 
 
 라인이 가장 잘 보이는 상태
-    ./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2350 -min 2300;open output/20120308_edit_00.jpg 
+		./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2350 -min 2300;open output/20120308_edit_00.jpg 
 
 Todo
 ====
