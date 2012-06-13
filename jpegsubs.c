@@ -24,22 +24,29 @@
 /*;                         520 Edgemont Road                         */
 /*;                         Charlottesville, VA 22903-2475 USA        */
 /*--------------------------------------------------------------------*/
+
+/*
+* added in memory compression for faster execution. 
+*                                          - jaypark@gmail.com 2012.6.13
+*/
+#include <stdio.h>
 #include <stdlib.h>
+#include "jerror.h"
+#include "jpeglib.h"
 
 #include "jpegsubs.h"
 
-/*                      JPEG compress routines                        */
-
-/* global values for jpeg I/O; allows 1 at a time */
-extern unsigned char *g_jpegbuffer;         /* output jpeg file name */
+extern unsigned char *g_jpegbuffer;         /* jpeg buffer for in memory conversion */
 int nx, ny;       /* size of image */
-int nonlinear;    /* if true use nonlinear mapping */
+int nonlinear = 0;    /* if true use nonlinear mapping */
+
 static float vmax, vmin; /* max and min unscaled values */
 JSAMPROW idata=NULL; /* buffer for scaled version of row */
 struct jpeg_compress_struct cinfo; /* jpeg compress structure */
 struct jpeg_error_mgr jerr;        /* jpeg error handler structure */
 JSAMPROW row_pointer[1];	   /* pointer to a single row */
 
+//************* routines for in memory conversion ***********/
 #define OUTPUT_BUF_SIZE 4096 /* choose an efficiently fwrite’able size */
 
 /* Expanded data destination object for memory output */
@@ -133,9 +140,10 @@ void jpeg_mem_dest (j_compress_ptr cinfo, unsigned char ** outbuffer, unsigned l
 	dest->pub.next_output_byte = dest->buffer = *outbuffer;
 	dest->pub.free_in_buffer = dest->bufsize = *outsize;
 }
-//*******************************************
+//************* end of routines for in memory conversion ***********/
 
-void jpgini (int inx, int iny, float ivmax,  float ivmin, int nonLin, int quality, int *ierr)
+
+void jpgini (int inx, int iny, float ivmax,  float ivmin, int *ierr)
 /*--------------------------------------------------------------------*/
 /*  Initializes i/o to jpeg output routines                           */
 /*  Inputs:                                                           */
@@ -146,7 +154,6 @@ void jpgini (int inx, int iny, float ivmax,  float ivmin, int nonLin, int qualit
 /*     ivmax    Maximum image value (values larger get this value)    */
 /*     ivmin    Minimum image value (values smaller get this value)   */
 /*     nonLin   if > 0.0 use non linear function                      */
-/*     quality  jpeg quality factor [1-100]                           */
 /*  Output:                                                           */
 /*     ierr     0.0 => OK                                             */
 /*--------------------------------------------------------------------*/
@@ -160,7 +167,6 @@ void jpgini (int inx, int iny, float ivmax,  float ivmin, int nonLin, int qualit
   ny = iny;
   vmax = ivmax;
   vmin = ivmin;
-  nonlinear = nonLin;
 
   /* row buffer */
   if (idata) free(idata);
@@ -189,9 +195,7 @@ void jpgini (int inx, int iny, float ivmax,  float ivmin, int nonLin, int qualit
   jpeg_set_defaults(&cinfo); /* get default settings */
 
   /* Make optional parameter settings here */
-  if (quality<1) quality = 1;  /* constrain range of quality factors */
-  if (quality>100) quality = 100;
-  jpeg_set_quality (&cinfo, quality, TRUE); /* set quality factor */
+  jpeg_set_quality (&cinfo, 100, TRUE); /* set quality factor */
 
   /* initialize compression */
   jpeg_start_compress(&cinfo, TRUE);

@@ -4,6 +4,7 @@
  *
  * Author : jaypark@gmail.com
  */
+#include <stdio.h>
 #include <cv.h>
 #include <highgui.h>
 #include "jpegsubs.h"
@@ -11,20 +12,17 @@
 
 
 /* global variables */
-char *infile;          /* input FITS file name */
-char *outfile;         /* output jpeg file name */
+char *infile = NULL;          /* input FITS file name */
+char *outfile= NULL;         /* output jpeg file name */
 unsigned char *g_jpegbuffer = NULL;         /* output jpeg file name */
 float *DataArray=NULL; /* image data as 1-D array */
-float fblank;          /* undefined pixel value */
+float fblank = 1.234567e25; 	/*  Set undefined value */
+/* undefined pixel value */
 float vmax,vmin;       /* Max. and Min. values to be displayed */
-int  NonLinear;        /* if true then nonlinear transfer fn. */
-int  quality;          /* jpeg quality factor [1-100] */
-int  GotMaxMin;        /* if true then already have max/min to display */
-long g_inaxes[7];        /* dimensions of axes */
 fitsfile *fptr;        /* cfitsio i/o file pointer */
 
 /* internal prototypes */
-void jpgfin (int argc, char **argv, int *ierr);
+void commandline (int argc, char **argv);
 void Usage(void);
 void jpegim (long inaxes[7], int *ierr);
 
@@ -37,11 +35,12 @@ void find_st_lines(char* fname) ;
 /*----------------------------------------------------------------------- */
 int main ( int argc, char **argv )
 {
-  int  i, iret, total;
+  int  i, iret=0, total;
   int  lenprefix;
   float g_vmax, g_vmin;
 	char *g_outfile;
-  jpgfin (argc, argv, &iret); 	/* Startup */
+	long g_inaxes[7];        /* dimensions of axes */
+  commandline (argc, argv); 	/* Startup */
   if (iret!=0) return iret;
   jpegim(g_inaxes, &iret); 								/* Convert to jpeg */
   if (iret!=0) return iret;
@@ -237,77 +236,13 @@ void find_st_lines(char* fname) {
 
 
 
-void jpgfin (int argc, char **argv, int *ierr)
-/*----------------------------------------------------------------------- */
-/*  Parse control info from command line */
-/*   Input: */
-/*      argc   Number of arguments from command line */
-/*      argv   Array of strings from command line */
-/*   Output: */
-/*      ierr       Error code: 0 => ok */
-/*      infile     FITS file name */
-/*      NonLinear  True if nonlinear function desired. */
-/*      vmax, vmin Max and min values(image units) to be displayed */
-/*----------------------------------------------------------------------- */
-{
-  int ax;
-  char *arg;
-
-  /*                                       Set undefined value */
-  fblank = 1.234567e25;
-  //vmax = fblank;
-  //vmin = fblank;
-  infile = NULL;
-  outfile = NULL;
-  NonLinear = 0;
-  quality = 100;
-
-  if (argc<=1) Usage(); /* must have arguments */
-/* parse command line */
-  for (ax=1; ax<argc; ax++) {
-    arg = argv[ax];
-    if (strcmp(arg, "-fits") == 0) {
-      infile = argv[++ax];
-    }
-    else if (strcmp(arg, "-jpeg") == 0) {
-      outfile = argv[++ax];
-    }
-    else if (strcmp(arg, "-nonLinear") == 0) {
-      NonLinear = 1;
-    }
-    else if (strcmp(arg, "-quality") == 0) {
-      quality = strtol(argv[++ax], (char **)NULL, 0);
-    }
-    else { /* unknown argument */
-      Usage();
-    }
-  }
-
-
-  /* must specify files */
-  if (!infile) Usage();
-
-  //if (!outfile) Usage();
-
-  *ierr = 0;
-} /* end jpgfin */
-
 
 
 void Usage()
-/*----------------------------------------------------------------------- */
-/*   Tells about usage of program and bails out */
-/*----------------------------------------------------------------------- */
 {
-    fprintf(stderr, "Usage: fits2jpeg -fits input_file -jpeg output_file [options]\n");
-    fprintf(stderr, "Options:\n");
-    fprintf(stderr, "       -nonLinear\n");
-    fprintf(stderr, "       -max max_image_value\n");
-    fprintf(stderr, "       -min min_image_value\n");
-    fprintf(stderr, "       -quality image_quality [1-100]\n");
-    
+    fprintf(stderr, "Usage: fits2jpeg -fits input_file\n");
     exit(1); /* bail out */
-  }/* end Usage */
+}
 
 void jpegim (long inaxes[7], int *ierr)
 /*----------------------------------------------------------------------- */
@@ -400,7 +335,7 @@ void write_jpg(long inaxes[7], int *ierr)
 /*                                       Initialize output */
   nx = inaxes[0];
   ny = inaxes[1];
-  jpgini (nx, ny, vmax, vmin, NonLinear, quality, ierr);
+  jpgini (nx, ny, vmax, vmin, ierr);
   if (*ierr!=0) {
     fprintf(stderr,"error %d initializing jpeg output \n", 
 	    *ierr);
@@ -430,4 +365,23 @@ void write_jpg(long inaxes[7], int *ierr)
       return;
     }
 } /* end jpegim */
+
+void commandline (int argc, char **argv)
+{
+  int ax;
+  char *arg;
+
+  if (argc<=1) Usage(); 
+  for (ax=1; ax<argc; ax++) {
+    arg = argv[ax];
+    if (strcmp(arg, "-fits") == 0) {
+      infile = argv[++ax];
+    }
+    else { 
+      Usage();
+    }
+  }
+
+  if (!infile) Usage();
+} 
 

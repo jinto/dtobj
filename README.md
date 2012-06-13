@@ -6,9 +6,9 @@ FITS 파일에서 Chopper에 의해 구간별로 쪼개진 직선의 검출.
 
 (참고 : FITS == http://fits.gsfc.nasa.gov/)
 
-빌드(맥OS)
+빌드
 =====
-1. Xcode(command line tool포함) 설치
+1. Xcode(command line tool포함) 설치 (Mac OS)
 -------
 
 https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
@@ -17,8 +17,8 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 
 ![스크린샷](https://github.com/jinto/dtobj/raw/master/xcode_commandline.png)
 
-		
-2. brew and opencv 설치
+
+2. brew and opencv 설치 (Mac OS)
 ----------
 
 LaunchPad 에서 유틸리티/터미널 실행한 후 
@@ -29,6 +29,13 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 	# install opencv
 	brew update
 	brew install opencv
+
+
+2. opencv 설치 (Linux : Debian 6)
+
+리눅스(데비안)에서는 다음과 같이 한다.
+
+	sudo apt-get install libcv-dev
 
 3. 소스	가져오기
 -----

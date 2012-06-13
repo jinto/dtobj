@@ -25,21 +25,17 @@
 /*;                         Charlottesville, VA 22903-2475 USA        */
 /*--------------------------------------------------------------------*/
 #include <math.h>
-//##include <malloc.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include "jerror.h"
-#include "jpeglib.h"
 #ifndef JPEGSUBS_H 
 #define JPEGSUBS_H 
 
 /*          includes for JPEG routines                                */
 
 /* initialize jpeg output file */
-void jpgini (int nx, int ny, float vmax,  float vmin, 
-	     int nonLin, int quality, int *ierr);
+void jpgini (int nx, int ny, float vmax,  float vmin, int *ierr);
 /* write row in jpeg image */
 void jpgwri (float *data, float blank, int *ierr);
 /* close jpeg image */

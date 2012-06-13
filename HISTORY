@@ -1,19 +1,20 @@
-Mission of this project was finding straight lines from fits a file. And 
-the lines must be on a virtual straight line. Fortunatly I can found every
-components from the internet. thanks to open source and stackoverflow.
+Mission of this project was finding straight lines which must be on a virtual 
+straight line from a fits file. Fortunatly all components for this mission could
+be found from the internet. Thanks to open source and stackoverflow.
 
-Among the many line detecting codes, i decided using opencv's cvHoughLines2
-which seems to be the best one after manual testing with sample fits files.
+Among the many line detecting codes, OpenCv's cvHoughLines2 seems to be the best 
+one after manual testing on sample fits file.
 
-And another big help was William Cottons 'FITS2jpeg' which converts fits 
+Another big help was William Cottons 'FITS2jpeg' which converts fits 
 file to jpeg. I needed it cause OpenCV can not handle fits file directly.
 
-At this stage, finding lines from a sample fits file took 5minutes and more 
-on my macbook pro(core2duo 2.66mhz). So the last one was 'in-memory 
-generation of jpeg' to eliminate unnessasary disk io. now it took 3minutes.
-and tuning is not finished.
+Finding lines from a sample fits file took 5minutes or more on my macbook 
+pro(core2duo 2.66mhz). So 'in-memory generation of jpeg' is needed to eliminate 
+unnessasary disk IO. now it took 2minutes.  and tuning is not finished.
 
-JPEG inmemory conversion http://stackoverflow.com/a/2609109
-JPEG buffer to CvArr http://stackoverflow.com/a/9930442
+OpenCV is on http://opencv.willowgarage.com/wiki/
+FITS2jpeg copyright message is saved in COPYRIGHT.fits2jpeg
+JPEG inmemory conversion code found at http://stackoverflow.com/a/2609109
+JPEG buffer to CvArr is on http://stackoverflow.com/a/9930442
 
 - 2012.6.13 jaypark@gmail.com

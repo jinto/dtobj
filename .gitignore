@@ -1,3 +1,4 @@
+.DS_Store
 *.o
 f2j
 line
@@ -7,3 +8,4 @@ cfitsio/cfitsio.pc
 cfitsio/config.log
 cfitsio/config.status
 output/*.jpg
+samples/*.jpg
