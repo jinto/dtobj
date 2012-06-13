@@ -1,39 +1,14 @@
-/*-----------------------------------------------------------------------*/
-/*  Copyright (C) 1996                                                   */
-/*  Associated Universities, Inc. Washington DC, USA.                    */
-/*  This program is free software; you can redistribute it and/or        */
-/*  modify it under the terms of the GNU General Public License as       */
-/*  published by the Free Software Foundation; either version 2 of       */
-/*  the License, or (at your option) any later version.                  */
-/*                                                                       */
-/*  This program is distributed in the hope that it will be useful,      */
-/*  but WITHOUT ANY WARRANTY; without even the implied warranty of       */
-/*  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        */
-/*  GNU General Public License for more details.                         */
-/*                                                                       */
-/*  You should have received a copy of the GNU General Public            */
-/*  License along with this program; if not, write to the Free           */
-/*  Software Foundation, Inc., 675 Massachusetts Ave, Cambridge,         */
-/*  MA 02139, USA.                                                       */
-/*                                                                       */
-/*  Correspondence concerning FITS2jpeg should be addressed as follows:  */
-/*         Internet email: bcotton@nrao.edu.                             */
-/*         Postal address: William Cotton                                */
-/*                         National Radio Astronomy Observatory          */
-/*                         520 Edgemont Road                             */
-/*                         Charlottesville, VA 22903-2475 USA            */
-/*-----------------------------------------------------------------------*/
-#include "jpegsubs.h"
-#include "cfitsio/fitsio.h"
-#include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+/* 
+ * Detect Object In the sky.
+ * Last version will be on https://github.com/jinto/dtobj
+ *
+ * Author : jaypark@gmail.com
+ */
 #include <cv.h>
 #include <highgui.h>
-#include <math.h>
+#include "jpegsubs.h"
+#include "cfitsio/fitsio.h"
+
 
 /* global variables */
 char *infile;          /* input FITS file name */
@@ -45,15 +20,13 @@ float vmax,vmin;       /* Max. and Min. values to be displayed */
 int  NonLinear;        /* if true then nonlinear transfer fn. */
 int  quality;          /* jpeg quality factor [1-100] */
 int  GotMaxMin;        /* if true then already have max/min to display */
-int  g_naxis;            /* number of axes */
 long g_inaxes[7];        /* dimensions of axes */
 fitsfile *fptr;        /* cfitsio i/o file pointer */
 
 /* internal prototypes */
 void jpgfin (int argc, char **argv, int *ierr);
 void Usage(void);
-void jpegim (int *naxis, long inaxes[7], int *ierr);
-void getdat (int naxis, long inaxes[7], int *ierr);
+void jpegim (long inaxes[7], int *ierr);
 
 void write_jpg(long inaxes[7], int *ierr);
 void find_st_lines(char* fname) ;
@@ -70,7 +43,7 @@ int main ( int argc, char **argv )
 	char *g_outfile;
   jpgfin (argc, argv, &iret); 	/* Startup */
   if (iret!=0) return iret;
-  jpegim(&g_naxis, g_inaxes, &iret); 								/* Convert to jpeg */
+  jpegim(g_inaxes, &iret); 								/* Convert to jpeg */
   if (iret!=0) return iret;
   fprintf(stderr,"vmax :%f\n", vmax);
   fprintf(stderr,"vmin :%f\n", vmin);
@@ -282,8 +255,8 @@ void jpgfin (int argc, char **argv, int *ierr)
 
   /*                                       Set undefined value */
   fblank = 1.234567e25;
-  vmax = fblank;
-  vmin = fblank;
+  //vmax = fblank;
+  //vmin = fblank;
   infile = NULL;
   outfile = NULL;
   NonLinear = 0;
@@ -336,7 +309,7 @@ void Usage()
     exit(1); /* bail out */
   }/* end Usage */
 
-void jpegim (int *naxis, long inaxes[7], int *ierr)
+void jpegim (long inaxes[7], int *ierr)
 /*----------------------------------------------------------------------- */
 /*   Copy FITS file  to jpeg */
 /*   Inputs in common: */
@@ -346,7 +319,7 @@ void jpegim (int *naxis, long inaxes[7], int *ierr)
 /*      ierr      Error code: 0 => ok */
 /*----------------------------------------------------------------------- */
 {
-  int   iln,  donon, lname;
+  int   naxis, iln,  donon, lname;
 
   *ierr = 0;
 /*                                       Open */
@@ -360,9 +333,9 @@ void jpegim (int *naxis, long inaxes[7], int *ierr)
 		int _bitpix, _simple, _extend, _maxdim=7;
 		long _pcount, _gcount;
 
-		fits_read_imghdr (fptr, _maxdim, &_simple, &_bitpix, naxis, inaxes, &_pcount, &_gcount, &_extend, ierr);
+		fits_read_imghdr (fptr, _maxdim, &_simple, &_bitpix, &naxis, inaxes, &_pcount, &_gcount, &_extend, ierr);
 		
-		fprintf(stderr,"fits_read_imghdr naxis: %d\n", *naxis);
+		fprintf(stderr,"fits_read_imghdr naxis: %d\n", naxis);
 		if (*ierr!=0) {
 			fprintf(stderr,"fits_read_imghdr error %d reading FITS header \n", *ierr);
 			return;
@@ -370,7 +343,47 @@ void jpegim (int *naxis, long inaxes[7], int *ierr)
 	}
 
 /*                                       Read FITS image */
-  getdat (*naxis, inaxes, ierr);
+	{
+		long size,trc[7];
+		int i, anyf;
+
+		size = inaxes[0]; 															/* How big is the array? */
+		size = size * inaxes[1];
+		if (DataArray) free(DataArray); 								/* free any old allocations */ 
+		DataArray = (float*)malloc(sizeof(float)*size);	
+		if (!DataArray) { 															
+			fprintf(stderr,"Cannot allocate memory for image array \n");
+			*ierr = 1;
+			return;
+		}
+	/*                                       Take all of image */
+		trc[0] = inaxes[0];
+		trc[1] = inaxes[1];
+	/*                                       but only first plane */
+		//for (i=2;i<naxis;i++) trc[i] = 1;
+		for (i=2;i< naxis;i++) trc[i] = 0;
+	/*                                       Read selected portion of input */
+		int group=0;
+		long incs[7]={1,1,1,1,1,1,1},blc[7]={1,1,1,1,1,1,1};
+		fits_read_subset_flt (fptr, group, naxis, inaxes, blc, trc, incs, fblank, DataArray, &anyf, ierr);
+		if (*ierr!=0) {
+			fprintf(stderr,"fits_read_subset_flt error reading input file \n");
+			return;
+		}
+	/*                                      Update data max, min */
+		float tmax,tmin;
+		tmin = 1.0e20;
+		tmax = -1.0e20;
+		for (i=0;i<size;i++) {
+			if ((!anyf) || (DataArray[i]!=fblank)) {
+				if (DataArray[i]>tmax) tmax = DataArray[i];
+				if (DataArray[i]<tmin) tmin = DataArray[i];
+			}
+		}
+
+		vmin = tmin;
+		vmax = tmax;
+	} /* end getdat */
   if (*ierr!=0) {
     fprintf(stderr,"ERROR getting image pixel values \n");
     return;
@@ -381,7 +394,8 @@ void jpegim (int *naxis, long inaxes[7], int *ierr)
 
 
 
-void write_jpg(long inaxes[7], int *ierr){
+void write_jpg(long inaxes[7], int *ierr)
+{
   int   i, irow,iptr, nx, ny, nrow, lrow;
 /*                                       Initialize output */
   nx = inaxes[0];
@@ -416,61 +430,4 @@ void write_jpg(long inaxes[7], int *ierr){
       return;
     }
 } /* end jpegim */
-
-
-
-
-void getdat (int naxis, long inaxes[7], int *ierr)
-/*----------------------------------------------------------------------- */
-/*   Read FITS file and determine max. and min. values */
-/*   Inputs in common: */
-/*      fptr    Input FITS fitsio unit number */
-/*   Output: */
-/*      ierr  I    Error code: 0 => ok */
-/*   Output in common: */
-/*      vmax    Maximum image value */
-/*      vmin    Minimum image value */
-/*      GotMaxMin    If true already have Max and Min values */
-/*----------------------------------------------------------------------- */
-{
-  long size,trc[7];
-  int i, anyf;
-
-  size = inaxes[0]; 															/* How big is the array? */
-  size = size * inaxes[1];
-  if (DataArray) free(DataArray); 								/* free any old allocations */ 
-  DataArray = (float*)malloc(sizeof(float)*size);	
-  if (!DataArray) { 															
-    fprintf(stderr,"Cannot allocate memory for image array \n");
-    *ierr = 1;
-    return;
-  }
-/*                                       Take all of image */
-  trc[0] = inaxes[0];
-  trc[1] = inaxes[1];
-/*                                       but only first plane */
-  //for (i=2;i<naxis;i++) trc[i] = 1;
-  for (i=2;i<naxis;i++) trc[i] = 0;
-/*                                       Read selected portion of input */
-  int group=0;
-  long incs[7]={1,1,1,1,1,1,1},blc[7]={1,1,1,1,1,1,1};
-  fits_read_subset_flt (fptr, group, naxis, inaxes, blc, trc, incs, fblank, DataArray, &anyf, ierr);
-  if (*ierr!=0) {
-    fprintf(stderr,"fits_read_subset_flt error reading input file \n");
-    return;
-  }
-/*                                      Update data max, min */
-  float tmax,tmin;
-  tmin = 1.0e20;
-  tmax = -1.0e20;
-  for (i=0;i<size;i++) {
-    if ((!anyf) || (DataArray[i]!=fblank)) {
-      if (DataArray[i]>tmax) tmax = DataArray[i];
-      if (DataArray[i]<tmin) tmin = DataArray[i];
-    }
-  }
-
-	vmin = tmin;
-  vmax = tmax;
-} /* end getdat */
 
