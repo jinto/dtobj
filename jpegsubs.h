@@ -30,6 +30,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include "jerror.h"
 #include "jpeglib.h"
 #ifndef JPEGSUBS_H 
 #define JPEGSUBS_H 
@@ -37,7 +38,7 @@
 /*          includes for JPEG routines                                */
 
 /* initialize jpeg output file */
-void jpgini (char *name, int nx, int ny, float vmax,  float vmin, 
+void jpgini (int nx, int ny, float vmax,  float vmin, 
 	     int nonLin, int quality, int *ierr);
 /* write row in jpeg image */
 void jpgwri (float *data, float blank, int *ierr);

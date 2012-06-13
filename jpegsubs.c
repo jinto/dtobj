@@ -24,24 +24,118 @@
 /*;                         520 Edgemont Road                         */
 /*;                         Charlottesville, VA 22903-2475 USA        */
 /*--------------------------------------------------------------------*/
+#include <stdlib.h>
+
 #include "jpegsubs.h"
 
 /*                      JPEG compress routines                        */
 
 /* global values for jpeg I/O; allows 1 at a time */
+extern unsigned char *g_jpegbuffer;         /* output jpeg file name */
 int nx, ny;       /* size of image */
 int nonlinear;    /* if true use nonlinear mapping */
-float vmax, vmin; /* max and min unscaled values */
-char *name=NULL;  /* name of output jpeg file */
+static float vmax, vmin; /* max and min unscaled values */
 JSAMPROW idata=NULL; /* buffer for scaled version of row */
-FILE *outfile=NULL;  /* output jpeg stream pointer */
 struct jpeg_compress_struct cinfo; /* jpeg compress structure */
 struct jpeg_error_mgr jerr;        /* jpeg error handler structure */
 JSAMPROW row_pointer[1];	   /* pointer to a single row */
 
+#define OUTPUT_BUF_SIZE 4096 /* choose an efficiently fwrite’able size */
 
-void jpgini (char *iname, int inx, int iny, float ivmax,  float ivmin, 
-	     int nonLin, int quality, int *ierr)
+/* Expanded data destination object for memory output */
+
+typedef struct {
+	struct jpeg_destination_mgr pub; /* public fields */
+
+	unsigned char ** outbuffer; /* target buffer */
+	unsigned long * outsize;
+	unsigned char * newbuffer; /* newly allocated buffer */
+	JOCTET * buffer; /* start of buffer */
+	size_t bufsize;
+} my_mem_destination_mgr;
+
+typedef my_mem_destination_mgr * my_mem_dest_ptr;
+
+void init_mem_destination (j_compress_ptr cinfo)
+{
+	/* no work necessary here */
+}
+
+boolean empty_mem_output_buffer (j_compress_ptr cinfo)
+{
+	size_t nextsize;
+	JOCTET * nextbuffer;
+	my_mem_dest_ptr dest = (my_mem_dest_ptr) cinfo->dest;
+
+	/* Try to allocate new buffer with double size */
+	nextsize = dest->bufsize * 2;
+	nextbuffer = (JOCTET *)malloc(nextsize);
+
+	if (nextbuffer == NULL)
+	ERREXIT1(cinfo, JERR_OUT_OF_MEMORY, 10);
+
+	memcpy(nextbuffer, dest->buffer, dest->bufsize);
+
+	if (dest->newbuffer != NULL)
+	free(dest->newbuffer);
+
+	dest->newbuffer = nextbuffer;
+
+	dest->pub.next_output_byte = nextbuffer + dest->bufsize;
+	dest->pub.free_in_buffer = dest->bufsize;
+
+	dest->buffer = nextbuffer;
+	dest->bufsize = nextsize;
+
+	return TRUE;
+}
+
+void term_mem_destination (j_compress_ptr cinfo)
+{
+	my_mem_dest_ptr dest = (my_mem_dest_ptr) cinfo->dest;
+
+	*dest->outbuffer = dest->buffer;
+	*dest->outsize=dest->bufsize - dest->pub.free_in_buffer;
+}
+
+void jpeg_mem_dest (j_compress_ptr cinfo, unsigned char ** outbuffer, unsigned long * outsize)
+{
+	my_mem_dest_ptr dest;
+
+	if (outbuffer == NULL || outsize == NULL) /* sanity check */
+	ERREXIT(cinfo, JERR_BUFFER_SIZE);
+
+	/* The destination object is made permanent so that multiple JPEG images
+	* can be written to the same buffer without re-executing jpeg_mem_dest.
+	*/
+	if (cinfo->dest == NULL) { /* first time for this JPEG object? */
+	cinfo->dest = (struct jpeg_destination_mgr *)
+	(*cinfo->mem->alloc_small) ((j_common_ptr) cinfo, JPOOL_PERMANENT,
+	sizeof(my_mem_destination_mgr));
+	}
+
+	dest = (my_mem_dest_ptr) cinfo->dest;
+	dest->pub.init_destination = init_mem_destination;
+	dest->pub.empty_output_buffer = empty_mem_output_buffer;
+	dest->pub.term_destination = term_mem_destination;
+	dest->outbuffer = outbuffer;
+	dest->outsize = outsize;
+	dest->newbuffer = NULL;
+
+	if (*outbuffer == NULL || *outsize == 0) {
+	/* Allocate initial buffer */
+	dest->newbuffer = *outbuffer = (unsigned char*)malloc(OUTPUT_BUF_SIZE);
+	if (dest->newbuffer == NULL)
+	ERREXIT1(cinfo, JERR_OUT_OF_MEMORY, 10);
+	*outsize = OUTPUT_BUF_SIZE;
+	}
+
+	dest->pub.next_output_byte = dest->buffer = *outbuffer;
+	dest->pub.free_in_buffer = dest->bufsize = *outsize;
+}
+//*******************************************
+
+void jpgini (int inx, int iny, float ivmax,  float ivmin, int nonLin, int quality, int *ierr)
 /*--------------------------------------------------------------------*/
 /*  Initializes i/o to jpeg output routines                           */
 /*  Inputs:                                                           */
@@ -57,25 +151,16 @@ void jpgini (char *iname, int inx, int iny, float ivmax,  float ivmin,
 /*     ierr     0.0 => OK                                             */
 /*--------------------------------------------------------------------*/
 {
-  int lname, i;
+  int i;
+
+	unsigned long outlen;
 
   /* get values */
   nx = inx;
   ny = iny;
-  lname = strlen(iname);
   vmax = ivmax;
   vmin = ivmin;
   nonlinear = nonLin;
-
-  /* file name */
-  if (name) free(name);
-  name = (char*)malloc(lname+1);
-  if (name == NULL) {
-    fprintf(stderr, "can't allocate file name");
-    *ierr = 1; /* set error return */
-    return; /* failed */
-  }
-  for (i=0;i<lname;i++) name[i] = iname[i]; name[i] = 0;
 
   /* row buffer */
   if (idata) free(idata);
@@ -87,19 +172,13 @@ void jpgini (char *iname, int inx, int iny, float ivmax,  float ivmin,
   }
   for (i=0;i<nx;i++) idata[i] = 0;
 
-  /* open output file */
-  if ((outfile = fopen(name, "wb")) == NULL) {
-    fprintf(stderr, "can't open %s\n", name);
-    *ierr = 3; /* set error return */
-    return; /* failed */
-  }
-
   /* create jpeg structures */
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_compress(&cinfo);
 
   /* initialize jpeg output routines */
-  jpeg_stdio_dest(&cinfo, outfile);
+
+	jpeg_mem_dest (&cinfo,&g_jpegbuffer,&outlen );
 
 /* set image parameters */
   cinfo.image_width = nx; 	/* image width and height, in pixels */
@@ -186,16 +265,11 @@ void jpgclo (int *ierr)
   /* finish compression/ flush output */
   jpeg_finish_compress(&cinfo);
 
-  /* close output file */
-  if (outfile) fclose(outfile);
-  outfile = NULL;
-
   jpeg_destroy_compress(&cinfo); /* delete jpeg structures */
 
-  /* delete file structures: file name */
-  if (name) free(name);
   /* row buffer */
   if (idata) free(idata);
+	idata=NULL;
 
   *ierr = 0; /* OK */
 } /* end of jpgclo */

@@ -1,2 +1,2 @@
 llvm-g++  `pkg-config --libs --cflags opencv` line.c -o line
-./line samples/building.jpg
+./line output/20120308_edit_00.jpg 
