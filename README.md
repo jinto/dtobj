@@ -1,15 +1,15 @@
 
 목적
 ====
-FITS 파일에서 Chopper에 의해 구간별로 쪼개진 직선의 검출. (FITS : http://fits.gsfc.nasa.gov/)
+FITS 파일에서 Chopper에 의해 구간별로 쪼개진 직선의 검출. 
 
 
+(참고 : FITS == http://fits.gsfc.nasa.gov/)
 
 빌드(맥OS)
 =====
-설치할 것들 
-
-1. Xcode(command line tool포함)
+1. Xcode(command line tool포함) 설치
+-------
 
 https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 
@@ -18,7 +18,8 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 스크린샷 : ![스크린샷](https://github.com/jinto/dtobj/raw/master/xcode_commandline.png)
 
 		
-2. brew and opencv 설치하기
+2. brew and opencv 설치
+----------
 
 터미널에서(LaunchPad 에서 유틸리티/터미널)
 		
@@ -30,6 +31,7 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 		brew install opencv
 
 3. 소스	가져오기
+-----
 
 		# 단순 clone
 		git clone http://github.com/jinto/dtobj
@@ -41,6 +43,7 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 
 
 4. 컴파일
+----
 
 		# 최초에는 cfitsio 라이브러리 빌드 필요
 		cd cfitsio; ./configure; make;cd ..;make
@@ -53,6 +56,7 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 
 라인이 가장 잘 보이는 상태
 		./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2350 -min 2300;open output/20120308_edit_00.jpg 
+
 
 Todo
 ====
