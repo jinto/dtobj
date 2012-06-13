@@ -57,11 +57,43 @@ vmin :2275.000000
 	 -max 2344 -min 2343
 	outfile = argv[++ax];*/
 	
+	bool detected[(int)g_vmax+10];
+	memset(detected, 0, g_vmax);
 	g_outfile = (char*)malloc(strlen(infile)+40);
-	//for (i = (int)g_vmin; i<(int)g_vmax;i+=50) {
-	for (i = (int)g_vmin; i<(int)g_vmax;i++) {
+
+	for (i = (int)g_vmin; i<(int)g_vmax;i+=5) {
+	//for (i = (int)g_vmin; i<(int)g_vmax;i++) {
 		vmin=i;
-		//vmax=i+300;
+		vmax=i+15;
+		//vmax=i+2;
+		if(g_jpegbuffer != NULL) {
+			free(g_jpegbuffer);
+			g_jpegbuffer=NULL;
+		}
+		outfile = g_outfile;
+		sprintf(outfile, "%s_%04.0f_1.jpg", infile,vmin);
+		printf("testing min:%d, range:%d...",(int)vmin, (int)(vmax-vmin));
+		write_jpg(g_inaxes, &iret);
+
+		if(find_st_lines(g_outfile)){
+			detected[i] = true;
+		}
+	}
+
+	for(i = 0; i < g_vmax-5; i++) {
+		//printf("%d,%d\n",i,detected[i]);
+		if (detected[i] ==true) {
+			for(int j = i-5; j< i+5; j++)
+				detected[j] = true;
+			i+=7;
+		}
+	}	
+
+	for (i = (int)g_vmin; i<(int)g_vmax;i++) {
+		if(detected[i] == false)
+			continue;
+
+		vmin=i;
 		vmax=i+2;
 		if(g_jpegbuffer != NULL) {
 			free(g_jpegbuffer);
@@ -103,12 +135,12 @@ bool find_st_lines(char* fname) {
 		// 전처리가 끝난 파일의 경우에는, 구간을 300이상으로 잡고, 엣지디텍션을 먼저 수행하도록 해야한다.
     cvCanny(src, dst, 10, 30, 3);
     lines = cvHoughLines2( dst, storage, CV_HOUGH_PROBABILISTIC,
-                           2,// 픽셀
-                           CV_PI/180,
+                           2,// 픽셀 2
+                           CV_PI/360,
                            //190,
                            80,
-                           50,
-                           10 );
+                           50, //50
+                           10 ); //10
 
     for( i = 0; i < lines->total; i++ )
     {
@@ -123,13 +155,14 @@ bool find_st_lines(char* fname) {
 				continue;
 			}
 		}
-		printf("lines: %d\n",lines->total - removed);
-		if(lines->total-removed <= 2 || lines->total-removed > 10) {
+		if(lines->total-removed <= 2 || lines->total-removed > 600) {
 			unlink(fname);
 			cvReleaseImage(&dst);
 			cvReleaseImage(&color_dst);
-			return true;
+			printf("lines: %d\n",lines->total - removed);
+			return false;
 		}
+		printf("lines: %d\n",lines->total - removed);
 		removed=0;
 
     //cvCanny(src, dst, 20, 200, 3);
