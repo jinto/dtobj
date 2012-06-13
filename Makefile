@@ -11,7 +11,7 @@ ifeq ($(UNAME), Darwin)
 endif
 
 f2j: cfitsio/libcfitsio.a dtobj.cpp jpegsubs.cpp
-	$(CC) `pkg-config --libs --cflags opencv` -ljpeg cfitsio/libcfitsio.a dtobj.cpp jpegsubs.cpp -o f2j
+	$(CC) `pkg-config --libs --cflags opencv` -ljpeg -lcfitsio dtobj.cpp jpegsubs.cpp -o f2j
 
 line: line.c
 	$(CC)  `pkg-config --libs --cflags opencv` line.c -o line

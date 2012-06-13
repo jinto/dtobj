@@ -5,10 +5,10 @@
  * Author : jaypark@gmail.com
  */
 #include <stdio.h>
-#include <cv.h>
+#include <fitsio.h>
 #include <highgui.h>
+#include <cv.h>
 #include "jpegsubs.h"
-#include "cfitsio/fitsio.h"
 
 
 /* global variables */

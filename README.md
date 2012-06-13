@@ -18,7 +18,7 @@ https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
 ![스크린샷](https://github.com/jinto/dtobj/raw/master/xcode_commandline.png)
 
 
-2. brew and opencv 설치 (Mac OS)
+2. brew and opencv, cfitsio 설치 (Mac OS)
 ----------
 
 LaunchPad 에서 유틸리티/터미널 실행한 후 
@@ -28,7 +28,7 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 		
 	# install opencv
 	brew update
-	brew install opencv
+	brew install opencv cfitsio
 
 
 2-1. opencv 설치 (Linux : Debian 6)
@@ -36,7 +36,7 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 
 리눅스(데비안)에서는 다음과 같이 한다.
 
-	sudo apt-get install libcv-dev libhighgui-dev  libcvaux-dev
+	sudo apt-get install libcv-dev libhighgui-dev  libcvaux-dev libcfitsio3-dev
 
 3. 소스	가져오기
 -----
@@ -59,10 +59,7 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 4. 컴파일
 ----
 
-		# 최초에는 cfitsio 라이브러리 빌드 필요
-		cd cfitsio; ./configure; make;cd ..
-		
-		# 이후에는 make만 실행하면 됨, 실행할 때는 -fits 옵션으로 fits파일을 지정해야함
+		# make만 실행하면 됨, 실행할 때는 -fits 옵션으로 fits파일을 지정해야함
 		./f2j -fits samples/20120308_edit_00.fit -quality 100 -max 2500 -min 2300;open output/20120308_edit_00.jpg 
 
 별이 가장 잘보이는 상태
