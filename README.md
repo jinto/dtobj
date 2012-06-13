@@ -11,8 +11,8 @@ FITS 파일에서 Chopper에 의해 구간별로 쪼개진 직선의 검출. (FI
 
 1. xcode(command line tool포함)
 https://developer.apple.com/xcode/ 에서 View in Mac App Store 클릭
-
 설치가 끝난 후에는 Xcode -> Preferences -> Downloads -> Command Line Tools -> install
+스크린샷 : ![스크린샷](https://github.com/jinto/dtobj/blob/master/xcode_commandline.png)
 		
 2. brew and opencv
 		
