@@ -10,8 +10,8 @@ ifeq ($(UNAME), Darwin)
 	CC = llvm-g++
 endif
 
-f2j: cfitsio/libcfitsio.a dtobj.cpp jpegsubs.c
-	$(CC) `pkg-config --libs --cflags opencv` -ljpeg cfitsio/libcfitsio.a dtobj.cpp jpegsubs.c -o f2j
+f2j: cfitsio/libcfitsio.a dtobj.cpp jpegsubs.cpp
+	$(CC) `pkg-config --libs --cflags opencv` -ljpeg cfitsio/libcfitsio.a dtobj.cpp jpegsubs.cpp -o f2j
 
 line: line.c
 	$(CC)  `pkg-config --libs --cflags opencv` line.c -o line
@@ -20,3 +20,6 @@ line: line.c
 	#cd cfitsio; make;cd ..
 	#cd cfitsio; ./configure; make;cd ..
 
+
+clean:
+	rm *.o

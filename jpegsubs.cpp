@@ -29,6 +29,7 @@
 * added in memory compression for faster execution. 
 *                                          - jaypark@gmail.com 2012.6.13
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "jerror.h"

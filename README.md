@@ -31,11 +31,12 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 	brew install opencv
 
 
-2. opencv 설치 (Linux : Debian 6)
+2-1. opencv 설치 (Linux : Debian 6)
+-----
 
 리눅스(데비안)에서는 다음과 같이 한다.
 
-	sudo apt-get install libcv-dev
+	sudo apt-get install libcv-dev libhighgui-dev  libcvaux-dev
 
 3. 소스	가져오기
 -----
@@ -46,7 +47,13 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 		# 수정권한이 필요한 경우 (먼저 관리자(jinto)에 요청해서, collaborator에 등록되어야함)
 		git clone git@github.com:jinto/dtobj
 
+		# 소스를 받아온 상태에서 최신 버전을 또 가져오려면
+		git pull
+
 		# github에서 fork한후 merge 요청하는 방식도 가능
+
+(git 설명서 : http://rogerdudler.github.com/git-guide/index.ko.html)
+
 
 
 4. 컴파일
