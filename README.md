@@ -34,37 +34,37 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 2-1. opencv 설치 (Linux : Debian 6)
 -----
 
-리눅스(데비안)에서는 다음과 같이 한다.
+리눅스(데비안)에서 opencv2.1 을 설치하려면, 다음과 같이 하면되는데,
 
 	sudo apt-get install libcv-dev libhighgui-dev  libcvaux-dev libcfitsio3-dev
 
-(현재는 메모리 오류가 발생하는데, 
-[OpenCV on Debian](http://www.lengrand.fr/2011/11/compiling-opencv-for-linux-debian/)와
-[OpenCV Wiki](http://opencv.willowgarage.com/wiki/InstallGuide%20%3A%20Debian) 참고
+opencv 2.1에서는 간혹 메모리 오류가 발생하기 때문에...
+
+( [OpenCV on Debian](http://www.lengrand.fr/2011/11/compiling-opencv-for-linux-debian/)와
+[OpenCV Wiki](http://opencv.willowgarage.com/wiki/InstallGuide%20%3A%20Debian) 참고해서 컴파일하는 것이 안정적이다.
 
 * 저 페이지의 svn은 동작안함, http://sourceforge.net/projects/opencvlibrary/files/opencv-unix/2.3.1/에서 소스 다운로드해야함
 
 * 중간에 v4l-dev는 libv4l-dev
 
-* CMake 부분은
+* CMake 부분은 아래처럼
 	cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_PYTHON_SUPPORT=ON -D BUILD_EXAMPLES=ON /home/jinto/OpenCV-2.3.1/
-이런식
 
 
 
 3. 소스	가져오기
 -----
 
-		# 단순 clone
-		git clone http://github.com/jinto/dtobj
+	# 단순 clone
+	git clone http://github.com/jinto/dtobj
 
-		# 수정권한이 필요한 경우 (먼저 관리자(jinto)에 요청해서, collaborator에 등록되어야함)
-		git clone git@github.com:jinto/dtobj
+	# 수정권한이 필요한 경우 (먼저 관리자(jinto)에 요청해서, collaborator에 등록되어야함)
+	git clone git@github.com:jinto/dtobj
 
-		# 소스를 받아온 상태에서 최신 버전을 또 가져오려면
-		git pull
+	# 소스를 받아온 상태에서 최신 버전을 또 가져오려면
+	git pull
 
-		# github에서 fork한후 merge 요청하는 방식도 가능
+	# github에서 fork한후 merge 요청하는 방식도 가능
 
 (git 설명서 : http://rogerdudler.github.com/git-guide/index.ko.html)
 
@@ -73,26 +73,10 @@ LaunchPad 에서 유틸리티/터미널 실행한 후
 4. 컴파일
 ----
 
-		# make만 실행하면 됨, 실행할 때는 -fits 옵션으로 fits파일을 지정해야함
-		./f2j -fits samples/20120308_edit_00.fit -quality 100 -max 2500 -min 2300;open output/20120308_edit_00.jpg 
-
-별이 가장 잘보이는 상태
-		./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2400 -min 2350;open output/20120308_edit_00.jpg 
-
-라인이 가장 잘 보이는 상태
-		./f2j -fits samples/20120308_edit_00.fit -jpeg output/20120308_edit_00.jpg -quality 100 -max 2350 -min 2300;open output/20120308_edit_00.jpg 
-
+	# make만 실행하면 됨
+	# 실행할 때는  옵션으로 fits파일을 지정해야함, fits 파일은 samples폴더에 있어야함.
+	./f2j 20120308_edit_00.fit 
+		
 
 Todo
 ====
-    
-FLIGrab은 20120308_edit_00.fit 에 대해서 자동으로 2317~2366 구간을 잡아낸다.
-아마도, 50씩 10만큼씩 조사하면 어떨까 싶다.
-
-
-Copyright
-=========
-See COPYRIGHT.fits2jpeg Fits to jpeg is from Associated 
-GPL.
-Copyright (C) 1996                                                   */
-/*  Associated Universities, Inc. Washington DC, USA.  
