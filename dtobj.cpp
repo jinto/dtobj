@@ -27,7 +27,7 @@ void Usage(void);
 void jpegim (long inaxes[7], int *ierr);
 
 void write_jpg(long inaxes[7], int *ierr);
-void find_st_lines(char* fname) ;
+bool find_st_lines(char* fname) ;
 
 
 /*----------------------------------------------------------------------- */
@@ -78,7 +78,7 @@ vmin :2275.000000
   return iret;
 } 
 
-void find_st_lines(char* fname) {
+bool find_st_lines(char* fname) {
 	int removed=0;
 	uchar *data;
 	int i,j,k;
@@ -126,7 +126,9 @@ void find_st_lines(char* fname) {
 		printf("lines: %d\n",lines->total - removed);
 		if(lines->total-removed <= 2 || lines->total-removed > 10) {
 			unlink(fname);
-			return;
+			cvReleaseImage(&dst);
+			cvReleaseImage(&color_dst);
+			return true;
 		}
 		removed=0;
 
@@ -136,31 +138,7 @@ void find_st_lines(char* fname) {
     //cvCvtColor( src, dst, CV_RGB2GRAY );
 		cvThreshold(src, dst, 128, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
     cvCvtColor( dst, color_dst, CV_GRAY2BGR );
-#if 0
-    lines = cvHoughLines2( dst, storage, CV_HOUGH_STANDARD,
-                           1, // 픽셀
-                           CV_PI/360, //각도, 라디안
-                           //CV_PI/180, //각도, 라디안
-                           //100,
-                           1,
-                           0,
-                           0 );
 
-    for( i = 0; i < MIN(lines->total,100); i++ )
-    {
-      float* line = (float*)cvGetSeqElem(lines,i);
-      float rho = line[0];
-      float theta = line[1];
-      CvPoint pt1, pt2;
-      double a = cos(theta), b = sin(theta);
-      double x0 = a*rho, y0 = b*rho;
-      pt1.x = cvRound(x0 + 1000*(-b));
-      pt1.y = cvRound(y0 + 1000*(a));
-      pt2.x = cvRound(x0 - 1000*(-b));
-      pt2.y = cvRound(y0 - 1000*(a));
-      cvLine( color_dst, pt1, pt2, CV_RGB(255,0,0), 3, 8 );
-    }
-#else
 		printf("detecting... again\n");
     lines = cvHoughLines2( dst, storage, CV_HOUGH_PROBABILISTIC,
                            2,// 픽셀
@@ -215,22 +193,31 @@ void find_st_lines(char* fname) {
 		line[0].y= 81.039624;
 		line[1].x=500;
 		line[1].y= 85.410814281408;
-		//cvLine( color_dst, line[0], line[1], CV_RGB(0,0,255), 2, 8 );
-		unlink(fname);
-		if (lines->total > 0 && lines->total-removed < 10) {
+		char *tfname = (char*)malloc(strlen(fname)+40);
+		char *sfname = (char*)malloc(strlen(fname)+1);
+		strcpy(sfname, infile);
+		if(strlen(sfname) > 5) {
+			*(sfname + strlen(sfname)-4)=0;
+		}
+		sprintf(tfname, "output/%s_%04.0f.jpg", sfname,vmin);
+		unlink(tfname);
+
+		if (lines->total -removed> 0 && lines->total-removed < 30) {
 			printf("lines :%d, saving..\n",lines->total - removed);
-			*(fname+strlen(fname)-5)='2';
-			cvSaveImage(fname, color_dst);
+			cvSaveImage(tfname, color_dst);
+			free(tfname);
+			free(sfname);
+			cvReleaseImage(&dst);
+			cvReleaseImage(&color_dst);
+			return true;
 		}
 		else printf("lines: %d\n",lines->total - removed);
-#endif
-    //cvNamedWindow( "Source", 1 );
-    //cvShowImage( "Source", src );
 
-    //cvNamedWindow( "Hough", 1 );
-    //cvShowImage( "Hough", color_dst );
-
-    //cvWaitKey(0);
+		free(tfname);
+		free(sfname);
+		cvReleaseImage(&dst);
+		cvReleaseImage(&color_dst);
+		return false;
   }
 }
 
